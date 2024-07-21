@@ -1,0 +1,101 @@
+#app {
+  inset: 0;
+  position: absolute;
+  place-self: center;
+  font-family: system-ui;
+}
+
+:root {
+  --bubble: 234;
+}
+
+.bubble-searchbox {
+  border: 2px solid black;
+  padding: 0.5rem 0.8rem;
+  border-radius: 0.3rem;
+  text-align: start;
+  width: 40dvw;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.bubble-space {
+  padding-left: 0.5rem;
+  margin-right: -0.5rem;
+}
+
+.bubble {
+  background-color: lightgray;
+  border-radius: 0.3rem;
+  padding: 2px 0.4rem 3px;
+  border: 1px solid black;
+  white-space: nowrap;
+}
+
+.bubble-key {
+  padding-right: 0.2rem;
+  font-weight: 500;
+}
+
+.bubble-value {
+}
+
+.bubble-invalid {
+  text-decoration-line: spelling-error;
+  position: relative;
+  display: inline-block;
+
+  &:hover::before {
+    content: attr(data-error);
+    color: #333;
+    font-weight: 500;
+    position: absolute;
+    top: 1.8rem;
+    left: 50%;
+    background: #ffdbe0;
+    white-space: pre;
+    text-align: center;
+    border: 1px solid #ffb9c4;
+    padding: 0.2rem 0.8rem;
+    transform: translateY(var(--fade-y)) translateX(-50%);
+    border-radius: 0.3rem;
+    box-shadow: 0px 1px 5px #00000018;
+    animation: fade 0.15s 0.2s forwards ease-out;
+    opacity: 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  &:hover::after {
+    content: '';
+    position: absolute;
+    top: 1.48rem;
+    left: 50%;
+    background: #ffdbe0;
+    transform: translateY(var(--fade-y)) translateX(-50%) rotate(45deg);
+    width: 10px;
+    height: 10px;
+    border: 1px solid;
+    border-color: #ffb9c4 transparent transparent #ffb9c4;
+    box-shadow: -1px -1px 3px -1px #0000000f;
+    animation: fade 0.15s 0.2s forwards ease-out;
+    opacity: 0;
+  }
+}
+
+@property --fade-y {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+    --fade-y: -5px;
+  }
+  to {
+    opacity: 1;
+    --fade-y: 0px;
+  }
+}
