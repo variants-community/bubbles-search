@@ -1,42 +1,260 @@
-import { JSX, render } from 'preact'
+import { ReadonlySignal, useComputed, useSignal } from '@preact/signals'
+import { JSX, RefObject, render } from 'preact'
 import { useEffect, useRef } from 'preact/hooks'
 import { getSelectionPosition, setSelectionPosition } from './utils'
 
-type Props = {
-  keys: string[]
+export type HintComponentProps<T> = { value: ReadonlySignal<string>; onSelect: (value: T) => void }
+
+type CustomHint<T> = {
+  type: 'custom'
+  component: (props: HintComponentProps<T>) => JSX.Element
 }
 
-export const BubblesSearch = (props: Props) => {
+type ListHint<T extends Record<string, unknown>> = {
+  type: 'list'
+  item: (props: T) => JSX.Element
+  getOptions: (partialValue: string) => T[]
+}
+
+type Hint<T> =
+  (T extends Record<string, unknown>
+  ? ListHint<T> | CustomHint<T>
+  : unknown extends T
+  ? ListHint<{}> | CustomHint<T>
+  : CustomHint<T>) & {
+    format: (value: T) => string
+    deserialize: (value: string) => T
+  }
+
+const List = <T extends Record<string, unknown>>(props: {
+  item: (props: T) => JSX.Element
+  options: ReadonlySignal<T[]>
+  onSelect: (val: T) => void
+}) => {
+  const current = useSignal<number>(0)
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        console.log('up ', current.value)
+        current.value = current.value > 0 ? current.value - 1 : 0
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        console.log('down ', current.value)
+        current.value = current.value < props.options.value.length - 1 ? current.value + 1 : current.value
+      } else if (e.key === 'Tab' || e.key === 'Enter') {
+        e.preventDefault()
+        props.onSelect(props.options.value[current.value])
+      }
+    }
+
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler)
+  }, [])
+
+  return (
+    <div class='bubble-search__hintbox__list'>
+      {props.options.value.map((option, i) => (
+        <div onMouseOver={() => current.value = i} class={`bubble-search__hintbox__list__item ${i === current.value ? 'bubble-search__hintbox__list__item--active' : ''}`} onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          e.stopImmediatePropagation()
+          props.onSelect(option)
+        }}><props.item {...option} /></div>
+      ))}
+    </div>
+  )
+}
+
+export const BubblesSearch = <T extends Record<string, unknown>>(props: {
+  hints: { [K in keyof T]: Hint<T[K]> }
+  onInput: (values: { [K in keyof T]: T[K][] } & { rowText: string}) => void
+}) => {
   const ref = useRef<HTMLDivElement>(null)
+  const hintPosition = useSignal<{ x: number; y: number }>()
+
+  const currentHintName = useSignal<keyof T>()
+  const currentHintValue = useSignal<string>('')
+  const currentAnchor = useRef<HTMLElement>(null)
+
+  const currentHint = useComputed(() =>
+    currentHintName.value ? (props.hints[currentHintName.value] as Hint<unknown>) : undefined
+  )
+
   useEffect(() => void ref.current?.dispatchEvent(new Event('input')), [])
 
   const onInput = (e: JSX.TargetedInputEvent<HTMLDivElement>) => {
+    // let values: { [K in keyof T]: T[K][]; }
+
+    // for (const key of Object.keys(props.hints)) {
+    //   // const val = props.hints[key]
+
+    //   values
+    // }
+
+    let values: Record<string, any[] | any> = {}
+
+
     let html = e.currentTarget.innerText
       .replace(/(^|\s)([^\s]+):([^\s]*)/g, (_, p, k, v) => {
-        if (!props.keys.includes(k))
+        if (!Object.keys(props.hints).includes(k)) {
+
           return _.replace(
             /^(\s*)([^\s]+)(\s*)$/,
             (_, s, m, e) =>
-              `${' '.repeat(s.length)}<span class="bubble-invalid" data-error="Unknown property '${k}'">${m}</span>${' '.repeat(e.length)}`
+              `${' '.repeat(s.length)}<span class="bubble-search__textbox__bubble--invalid" data-error="Unknown property '${k}'">${m}</span>${' '.repeat(e.length)}`
           )
-        return `<span class="bubble-space">${p}</span><span class="bubble"><span class="bubble-key">${k}<span class="bubble-colon">:</span></span><span class="bubble-value">${v}</span></span>`
+        }
+
+        console.log('k: ', k)
+        console.log('v: ', v)
+
+        const itemValue =  props.hints[k].deserialize(v)
+        if (itemValue) {
+          if (k in values) {
+            values[k].push(v)
+          } else {
+            values[k] = [v]
+          }
+        }
+
+        return `<span class="bubble-search__textbox__bubble-space">${p}</span><span class="bubble-search__textbox__bubble"><span class="bubble-search__textbox__bubble__key">${k}<span class="bubble-search__textbox__bubble-colon">:</span></span><span class="bubble-search__textbox__bubble__value">${v}</span></span>`
       })
       .replace(/\u00A0([^\s<>])/g, ' $1')
       .replace(/(<\/span>)\s*$/, '$1\u00A0')
 
     const selection = document.getSelection()!
+
     const position = selection.rangeCount && getSelectionPosition(selection, e.currentTarget)
     e.currentTarget.innerHTML = html
     selection.rangeCount && setSelectionPosition(selection, e.currentTarget, position)
+
+    const anchorNode = selection.anchorNode?.parentElement
+    let bubble = undefined
+
+    if (anchorNode) {
+      currentAnchor.current = anchorNode
+      if (anchorNode.className === 'bubble-search__textbox__bubble-colon') {
+        currentHintName.value = anchorNode.parentElement!.childNodes[0].textContent!
+
+        currentHintValue.value = ''
+        bubble = anchorNode.parentElement!.parentElement
+      } else if (anchorNode.className === 'bubble-search__textbox__bubble__value') {
+        currentHintName.value = anchorNode.parentElement!.childNodes[0].childNodes[0].textContent!
+        currentHintValue.value = anchorNode.textContent!
+        bubble = anchorNode.parentElement
+      } else {
+        currentHintName.value = undefined
+        currentHintValue.value = ''
+      }
+    }
+
+    if (bubble && ref.current) {
+      const bubbleRect = bubble.getBoundingClientRect()
+      const searchRect = ref.current.getBoundingClientRect()
+
+      const x = bubbleRect.x - searchRect.x
+      const y = bubbleRect.y - searchRect.y
+
+      hintPosition.value = { x, y }
+    } else {
+      hintPosition.value = undefined
+    }
+
+    values['rowText'] = html.replace(/<[^>]*>/g, "")
+
+    // @ts-ignore
+    props.onInput(values)
   }
 
+
+
   return (
-    <div ref={ref} class='bubble-searchbox' contenteditable spellcheck={false} onInput={onInput}>
-      Hello! My name:Artur is known, and I am here to action:play for typee:fun. Would you like to join:me, Mr.
-      name:unknown ?
+    <div class='bubble-search'>
+      <div ref={ref} class='bubble-search__textbox' contenteditable spellcheck={false} onInput={onInput}>
+        Hello! My name:Artur
+      </div>
+      <Hint textboxRef={ref} anchor={currentAnchor} position={hintPosition} hint={currentHint} closeHint={() => currentHintName.value = undefined} partialValue={currentHintValue} />
     </div>
   )
 }
 
-BubblesSearch.mount = (selector: string, props: Props) =>
-  render(<BubblesSearch {...props} />, document.querySelector(selector)!)
+const Hint = <T extends unknown>(props: {
+  position: ReadonlySignal<{ x: number; y: number } | undefined>
+  hint: ReadonlySignal<Hint<T> | undefined>
+  closeHint: () => void
+  partialValue: ReadonlySignal<string>
+  anchor: RefObject<HTMLElement>
+  textboxRef: RefObject<HTMLElement>
+}) => {
+  if (!props.hint.value) return null
+
+  const options = useComputed(() => {
+    if (!props.hint.value || props.hint.value.type === 'custom') return []
+    return props.hint.value.getOptions(props.partialValue.value)
+  })
+
+  const style = useComputed(
+    () => props.position.value && `transform: translate(${props.position.value.x}px, 10px)`// `transform: translate(${props.position.value.x}px, ${props.position.value.y}px)`
+  )
+  return (
+    <div class='bubble-search__hintbox' style={style}>
+      {props.hint.value.type === 'custom' ? (
+        <props.hint.value.component
+          value={props.partialValue}
+          onSelect={selectedValueObject => {
+            console.log(selectedValueObject)
+            // props.hint.value.
+          }}
+        />
+      ) : (
+        <List item={props.hint.value.item} options={options} onSelect={v => {
+          if (props.hint.value && props.hint.value.type === 'list') {
+            // console.log(v)
+            const rowValue = props.hint.value.format(v as any)
+
+            if (props.anchor.current) {
+              let valueSpan = undefined
+
+              if (props.anchor.current.classList.contains('bubble-search__textbox__bubble__value')) {
+                valueSpan = props.anchor.current
+              } else if (props.anchor.current.classList.contains('bubble-search__textbox__bubble-colon')) {
+                valueSpan = props.anchor.current.parentElement?.nextElementSibling
+              }
+
+              console.log('value span: ', valueSpan)
+              if (!valueSpan) return
+
+              const attr = document.createAttribute('data-item')
+              attr.value = JSON.stringify(v)
+              valueSpan.attributes.setNamedItem(attr)
+
+              const selection = document.getSelection()!
+              const position = selection.rangeCount && getSelectionPosition(selection, props.textboxRef.current!)
+              const startLength = valueSpan.innerHTML.length
+              valueSpan.innerHTML = rowValue
+              selection.rangeCount && setSelectionPosition(selection, props.textboxRef.current!, position + rowValue.length - startLength + 1)
+              props.closeHint()
+
+              const eventTrigger = new Event('input')
+              props.textboxRef.current?.dispatchEvent(eventTrigger)
+
+            }
+          }
+
+          console.log('anchor: ', props.anchor)
+          console.log('selected: ', v)
+        }} />
+      )}
+    </div>
+  )
+}
+
+BubblesSearch.mount = <T extends Record<string, unknown>>(
+  selector: string,
+  props: {
+    hints: { [K in keyof T]: Hint<T[K]> }
+    onInput: (values: { [K in keyof T]: T[K][] } & { rowText: string}) => void
+  }
+) => render(<BubblesSearch {...props} />, document.querySelector(selector)!)

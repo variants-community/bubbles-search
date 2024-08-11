@@ -1,3 +1,7 @@
+:root {
+  --bubble: 234;
+}
+
 #app {
   inset: 0;
   position: absolute;
@@ -5,19 +9,12 @@
   font-family: system-ui;
 }
 
-:root {
-  --bubble: 234;
-}
-
 .bubble-search {
   position: relative;
 }
 
-.bubble-hintsbox {
-  position: absolute;
-}
-
-.bubble-searchbox {
+.bubble-search__textbox {
+  outline: none;
   border: 2px solid black;
   padding: 0.5rem 0.8rem;
   border-radius: 0.3rem;
@@ -27,12 +24,37 @@
   line-height: 1.7;
 }
 
-.bubble-space {
-  padding-left: 0.5rem;
-  margin-right: -0.5rem;
+.bubble-search__hintbox {
+  position: absolute;
 }
 
-.bubble {
+.bubble-search__hintbox__list {
+  overflow: hidden;
+  border-radius: 0.3rem;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid black;
+}
+
+.bubble-search__hintbox__list__item {
+  padding: 0 0.5rem;
+}
+
+.bubble-search__hintbox__list__item--active {
+  color: white;
+  background-color: black;
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
+}
+
+.bubble-search__hintbox__list__item--active:first-child {
+  border-top: none;
+}
+.bubble-search__hintbox__list__item--active:last-child {
+  border-bottom: none;
+}
+
+.bubble-search__textbox__bubble {
   background-color: lightgray;
   border-radius: 0.3rem;
   padding: 2px 0.4rem 3px;
@@ -40,15 +62,22 @@
   white-space: nowrap;
 }
 
-.bubble-key {
+.bubble-search__textbox__bubble-space {
+  padding-left: 0.5rem;
+  margin-right: -0.5rem;
+}
+
+.bubble-search__textbox__bubble__key {
   padding-right: 0.2rem;
   font-weight: 500;
 }
-
-.bubble-value {
+.bubble-search__textbox__bubble__value {
 }
 
-.bubble-invalid {
+.bubble-search__textbox__bubble-colon {
+}
+
+.bubble-search__textbox__bubble--invalid {
   text-decoration-line: spelling-error;
   position: relative;
   display: inline-block;
