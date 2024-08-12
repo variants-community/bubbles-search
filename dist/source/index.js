@@ -9,12 +9,10 @@ const List = (props) => {
         const handler = (e) => {
             if (e.key === 'ArrowUp') {
                 e.preventDefault();
-                console.log('up ', current.value);
                 current.value = current.value > 0 ? current.value - 1 : 0;
             }
             else if (e.key === 'ArrowDown') {
                 e.preventDefault();
-                console.log('down ', current.value);
                 current.value = current.value < props.options.value.length - 1 ? current.value + 1 : current.value;
             }
             else if (e.key === 'Tab' || e.key === 'Enter') {
@@ -25,7 +23,12 @@ const List = (props) => {
         document.addEventListener('keydown', handler);
         return () => document.removeEventListener('keydown', handler);
     }, []);
-    return (_jsx("div", { class: 'bubble-search__hintbox__list', children: props.options.value.map((option, i) => (_jsx("div", { onMouseOver: () => current.value = i, class: `bubble-search__hintbox__list__item ${i === current.value ? 'bubble-search__hintbox__list__item--active' : ''}`, onClick: (e) => {
+    const ref = useRef(null);
+    const scrollToIndexHack = (index) => {
+        ref.current?.children[index].scrollIntoView({ behavior: 'smooth' });
+        return 'bubble-search__hintbox__list__item--active';
+    };
+    return (_jsx("div", { ref: ref, class: 'bubble-search__hintbox__list', children: props.options.value.map((option, i) => (_jsx("div", { onMouseOver: () => current.value = i, class: `bubble-search__hintbox__list__item ${i === current.value ? scrollToIndexHack(i) : ''}`, onClick: (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 e.stopImmediatePropagation();
@@ -41,19 +44,12 @@ export const BubblesSearch = (props) => {
     const currentHint = useComputed(() => currentHintName.value ? props.hints[currentHintName.value] : undefined);
     useEffect(() => void ref.current?.dispatchEvent(new Event('input')), []);
     const onInput = (e) => {
-        // let values: { [K in keyof T]: T[K][]; }
-        // for (const key of Object.keys(props.hints)) {
-        //   // const val = props.hints[key]
-        //   values
-        // }
         let values = {};
         let html = e.currentTarget.innerText
             .replace(/(^|\s)([^\s]+):([^\s]*)/g, (_, p, k, v) => {
             if (!Object.keys(props.hints).includes(k)) {
                 return _.replace(/^(\s*)([^\s]+)(\s*)$/, (_, s, m, e) => `${' '.repeat(s.length)}<span class="bubble-search__textbox__bubble--invalid" data-error="Unknown property '${k}'">${m}</span>${' '.repeat(e.length)}`);
             }
-            console.log('k: ', k);
-            console.log('v: ', v);
             const itemValue = props.hints[k].deserialize(v);
             if (itemValue) {
                 if (k in values) {
@@ -104,7 +100,7 @@ export const BubblesSearch = (props) => {
         // @ts-ignore
         props.onInput(values);
     };
-    return (_jsxs("div", { class: 'bubble-search', children: [_jsx("div", { ref: ref, class: 'bubble-search__textbox', contenteditable: true, spellcheck: false, onInput: onInput, children: "Hello! My name:Artur" }), _jsx(Hint, { textboxRef: ref, anchor: currentAnchor, position: hintPosition, hint: currentHint, closeHint: () => currentHintName.value = undefined, partialValue: currentHintValue })] }));
+    return (_jsxs("div", { class: 'bubble-search', children: [_jsx("div", { ref: ref, class: 'bubble-search__textbox', contenteditable: true, spellcheck: false, onInput: onInput }), _jsx(Hint, { textboxRef: ref, anchor: currentAnchor, position: hintPosition, hint: currentHint, closeHint: () => currentHintName.value = undefined, partialValue: currentHintValue })] }));
 };
 const Hint = (props) => {
     if (!props.hint.value)
@@ -118,7 +114,6 @@ const Hint = (props) => {
     );
     return (_jsx("div", { class: 'bubble-search__hintbox', style: style, children: props.hint.value.type === 'custom' ? (_jsx(props.hint.value.component, { value: props.partialValue, onSelect: selectedValueObject => {
                 if (props.hint.value && props.hint.value.type === 'custom') {
-                    console.log('ON SELECT');
                     replaceWithHint({
                         currentBubbleAnchor: props.anchor,
                         textInputAnchor: props.textboxRef,
@@ -135,8 +130,6 @@ const Hint = (props) => {
                     });
                 }
                 props.closeHint();
-                console.log('anchor: ', props.anchor);
-                console.log('selected: ', selectedValueObject);
             } })) }));
 };
 const replaceWithHint = ({ currentBubbleAnchor, textInputAnchor, rowValue }) => {

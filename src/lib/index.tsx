@@ -37,11 +37,9 @@ const List = <T extends Record<string, unknown>>(props: {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'ArrowUp') {
         e.preventDefault()
-        console.log('up ', current.value)
         current.value = current.value > 0 ? current.value - 1 : 0
       } else if (e.key === 'ArrowDown') {
         e.preventDefault()
-        console.log('down ', current.value)
         current.value = current.value < props.options.value.length - 1 ? current.value + 1 : current.value
       } else if (e.key === 'Tab' || e.key === 'Enter') {
         e.preventDefault()
@@ -53,10 +51,20 @@ const List = <T extends Record<string, unknown>>(props: {
     return () => document.removeEventListener('keydown', handler)
   }, [])
 
+  const ref = useRef<HTMLDivElement>(null)
+
+  const scrollToIndexHack = (index: number) => {
+        
+
+    ref.current?.children[index].scrollIntoView({behavior: 'smooth'})
+    
+    return 'bubble-search__hintbox__list__item--active'
+  }
+
   return (
-    <div class='bubble-search__hintbox__list'>
+    <div ref={ref} class='bubble-search__hintbox__list'>
       {props.options.value.map((option, i) => (
-        <div onMouseOver={() => current.value = i} class={`bubble-search__hintbox__list__item ${i === current.value ? 'bubble-search__hintbox__list__item--active' : ''}`} onClick={(e) => {
+        <div onMouseOver={() => current.value = i} class={`bubble-search__hintbox__list__item ${i === current.value ? scrollToIndexHack(i) : ''}`} onClick={(e) => {
           e.preventDefault()
           e.stopPropagation()
           e.stopImmediatePropagation()
@@ -85,16 +93,7 @@ export const BubblesSearch = <T extends Record<string, unknown>>(props: {
   useEffect(() => void ref.current?.dispatchEvent(new Event('input')), [])
 
   const onInput = (e: JSX.TargetedInputEvent<HTMLDivElement>) => {
-    // let values: { [K in keyof T]: T[K][]; }
-
-    // for (const key of Object.keys(props.hints)) {
-    //   // const val = props.hints[key]
-
-    //   values
-    // }
-
     let values: Record<string, any[] | any> = {}
-
 
     let html = e.currentTarget.innerText
       .replace(/(^|\s)([^\s]+):([^\s]*)/g, (_, p, k, v) => {
@@ -106,9 +105,6 @@ export const BubblesSearch = <T extends Record<string, unknown>>(props: {
               `${' '.repeat(s.length)}<span class="bubble-search__textbox__bubble--invalid" data-error="Unknown property '${k}'">${m}</span>${' '.repeat(e.length)}`
           )
         }
-
-        console.log('k: ', k)
-        console.log('v: ', v)
 
         const itemValue = props.hints[k].deserialize(v)
         if (itemValue) {
@@ -173,7 +169,6 @@ export const BubblesSearch = <T extends Record<string, unknown>>(props: {
   return (
     <div class='bubble-search'>
       <div ref={ref} class='bubble-search__textbox' contenteditable spellcheck={false} onInput={onInput}>
-        Hello! My name:Artur
       </div>
       <Hint textboxRef={ref} anchor={currentAnchor} position={hintPosition} hint={currentHint} closeHint={() => currentHintName.value = undefined} partialValue={currentHintValue} />
     </div>
@@ -204,12 +199,13 @@ const Hint = <T extends unknown>(props: {
         <props.hint.value.component
           value={props.partialValue}
           onSelect={selectedValueObject => {
-            if (props.hint.value && props.hint.value.type === 'custom') {              
+            if (props.hint.value && props.hint.value.type === 'custom') {         
               replaceWithHint({
                 currentBubbleAnchor: props.anchor,
                 textInputAnchor: props.textboxRef,
                 rowValue: props.hint.value.format(selectedValueObject as any)
               })
+              props.closeHint()
             }
           }}
         />
@@ -222,11 +218,7 @@ const Hint = <T extends unknown>(props: {
               rowValue: props.hint.value.format(selectedValueObject as any)
             })
           }
-
           props.closeHint()
-
-          console.log('anchor: ', props.anchor)
-          console.log('selected: ', selectedValueObject)
         }} />
       )}
     </div>

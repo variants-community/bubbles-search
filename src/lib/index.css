@@ -29,11 +29,12 @@
 }
 
 .bubble-search__hintbox__list {
-  overflow: hidden;
+  overflow: scroll;
   border-radius: 0.3rem;
   display: flex;
   flex-direction: column;
   border: 1px solid black;
+  max-height: 100px;
 }
 
 .bubble-search__hintbox__list__item {
