@@ -28,7 +28,7 @@ const List = (props) => {
         if (!ref.current)
             return;
         const top = ref.current.children[index].offsetTop;
-        ref.current.scrollTo({ top, behavior: 'smooth' });
+        ref.current.scrollTop = top;
         // ref.current?.children[index].scrollIntoView({behavior: 'smooth', block: 'nearest'})
         return 'bubble-search__hintbox__list__item--active';
     };

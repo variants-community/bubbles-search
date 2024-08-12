@@ -41,7 +41,7 @@ const D = (e, t) => {
   const n = p(null), l = (a) => {
     if (!n.current) return;
     const o = n.current.children[a].offsetTop;
-    return n.current.scrollTo({ top: o, behavior: "smooth" }), "bubble-search__hintbox__list__item--active";
+    return n.current.scrollTop = o, "bubble-search__hintbox__list__item--active";
   };
   return /* @__PURE__ */ s("div", { ref: n, class: "bubble-search__hintbox__list", children: e.options.value.map((a, o) => /* @__PURE__ */ s("div", { onMouseOver: () => t.value = o, class: `bubble-search__hintbox__list__item ${o === t.value ? l(o) : ""}`, onClick: (r) => {
     r.preventDefault(), r.stopPropagation(), r.stopImmediatePropagation(), e.onSelect(a);
