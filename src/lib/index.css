@@ -29,7 +29,7 @@
 }
 
 .bubble-search__hintbox__list {
-  overflow: scroll;
+  overflow-y: scroll;
   border-radius: 0.3rem;
   display: flex;
   flex-direction: column;

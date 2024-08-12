@@ -54,10 +54,11 @@ const List = <T extends Record<string, unknown>>(props: {
   const ref = useRef<HTMLDivElement>(null)
 
   const scrollToIndexHack = (index: number) => {
-        
+    if (!ref.current) return
 
-    ref.current?.children[index].scrollIntoView({behavior: 'smooth'})
-    
+    const top = (ref.current.children[index]as any).offsetTop
+    ref.current.scrollTo({top, behavior: 'smooth'})
+    // ref.current?.children[index].scrollIntoView({behavior: 'smooth', block: 'nearest'})
     return 'bubble-search__hintbox__list__item--active'
   }
 
