@@ -117,38 +117,46 @@ const Hint = (props) => {
     const style = useComputed(() => props.position.value && `transform: translate(${props.position.value.x}px, 10px)` // `transform: translate(${props.position.value.x}px, ${props.position.value.y}px)`
     );
     return (_jsx("div", { class: 'bubble-search__hintbox', style: style, children: props.hint.value.type === 'custom' ? (_jsx(props.hint.value.component, { value: props.partialValue, onSelect: selectedValueObject => {
-                console.log(selectedValueObject);
-                // props.hint.value.
-            } })) : (_jsx(List, { item: props.hint.value.item, options: options, onSelect: v => {
-                if (props.hint.value && props.hint.value.type === 'list') {
-                    // console.log(v)
-                    const rowValue = props.hint.value.format(v);
-                    if (props.anchor.current) {
-                        let valueSpan = undefined;
-                        if (props.anchor.current.classList.contains('bubble-search__textbox__bubble__value')) {
-                            valueSpan = props.anchor.current;
-                        }
-                        else if (props.anchor.current.classList.contains('bubble-search__textbox__bubble-colon')) {
-                            valueSpan = props.anchor.current.parentElement?.nextElementSibling;
-                        }
-                        console.log('value span: ', valueSpan);
-                        if (!valueSpan)
-                            return;
-                        const attr = document.createAttribute('data-item');
-                        attr.value = JSON.stringify(v);
-                        valueSpan.attributes.setNamedItem(attr);
-                        const selection = document.getSelection();
-                        const position = selection.rangeCount && getSelectionPosition(selection, props.textboxRef.current);
-                        const startLength = valueSpan.innerHTML.length;
-                        valueSpan.innerHTML = rowValue;
-                        selection.rangeCount && setSelectionPosition(selection, props.textboxRef.current, position + rowValue.length - startLength + 1);
-                        props.closeHint();
-                        const eventTrigger = new Event('input');
-                        props.textboxRef.current?.dispatchEvent(eventTrigger);
-                    }
+                if (props.hint.value && props.hint.value.type === 'custom') {
+                    console.log('ON SELECT');
+                    replaceWithHint({
+                        currentBubbleAnchor: props.anchor,
+                        textInputAnchor: props.textboxRef,
+                        rowValue: props.hint.value.format(selectedValueObject)
+                    });
+                    props.closeHint();
                 }
+            } })) : (_jsx(List, { item: props.hint.value.item, options: options, onSelect: selectedValueObject => {
+                if (props.hint.value && props.hint.value.type === 'list') {
+                    replaceWithHint({
+                        currentBubbleAnchor: props.anchor,
+                        textInputAnchor: props.textboxRef,
+                        rowValue: props.hint.value.format(selectedValueObject)
+                    });
+                }
+                props.closeHint();
                 console.log('anchor: ', props.anchor);
-                console.log('selected: ', v);
+                console.log('selected: ', selectedValueObject);
             } })) }));
+};
+const replaceWithHint = ({ currentBubbleAnchor, textInputAnchor, rowValue }) => {
+    if (currentBubbleAnchor.current) {
+        let valueSpan = undefined;
+        if (currentBubbleAnchor.current.classList.contains('bubble-search__textbox__bubble__value')) {
+            valueSpan = currentBubbleAnchor.current;
+        }
+        else if (currentBubbleAnchor.current.classList.contains('bubble-search__textbox__bubble-colon')) {
+            valueSpan = currentBubbleAnchor.current.parentElement?.nextElementSibling;
+        }
+        if (!valueSpan)
+            return;
+        const selection = document.getSelection();
+        const position = selection.rangeCount && getSelectionPosition(selection, textInputAnchor.current);
+        const startLength = valueSpan.innerHTML.length;
+        valueSpan.innerHTML = rowValue;
+        selection.rangeCount && setSelectionPosition(selection, textInputAnchor.current, position + rowValue.length - startLength + 1);
+        const eventTrigger = new Event('input');
+        textInputAnchor.current?.dispatchEvent(eventTrigger);
+    }
 };
 BubblesSearch.mount = (selector, props) => render(_jsx(BubblesSearch, { ...props }), document.querySelector(selector));

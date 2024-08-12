@@ -1,100 +1,104 @@
-import { options as y, render as L } from "preact";
-import { useSignal as x, useComputed as p } from "@preact/signals";
-import { useRef as E, useEffect as N } from "preact/hooks";
-var k = 0;
-function b(e, t, l, n, a, c) {
+import { options as y, render as k } from "preact";
+import { useSignal as m, useComputed as x } from "@preact/signals";
+import { useRef as E, useEffect as C } from "preact/hooks";
+var D = 0;
+function i(e, t, l, n, a, r) {
   t || (t = {});
-  var o, r, u = t;
-  if ("ref" in u) for (r in u = {}, t) r == "ref" ? o = t[r] : u[r] = t[r];
-  var s = { type: e, props: u, key: l, ref: o, __k: null, __: null, __b: 0, __e: null, __d: void 0, __c: null, constructor: void 0, __v: --k, __i: -1, __u: 0, __source: a, __self: c };
-  if (typeof e == "function" && (o = e.defaultProps)) for (r in o) u[r] === void 0 && (u[r] = o[r]);
-  return y.vnode && y.vnode(s), s;
+  var o, c, u = t;
+  if ("ref" in u) for (c in u = {}, t) c == "ref" ? o = t[c] : u[c] = t[c];
+  var _ = { type: e, props: u, key: l, ref: o, __k: null, __: null, __b: 0, __e: null, __d: void 0, __c: null, constructor: void 0, __v: --D, __i: -1, __u: 0, __source: a, __self: r };
+  if (typeof e == "function" && (o = e.defaultProps)) for (c in o) u[c] === void 0 && (u[c] = o[c]);
+  return y.vnode && y.vnode(_), _;
 }
-const A = (e, t) => {
+const V = (e, t) => {
   const l = document.createRange();
   l.selectNode(e);
   const n = [e];
-  let a, c = 0;
+  let a, r = 0;
   for (; a = n.pop(); )
     if (a.nodeType === Node.TEXT_NODE) {
       const o = a.textContent.length;
-      if (c + o >= t)
-        return l.setStart(a, t - c), l.collapse(!0), l;
-      c += o;
+      if (r + o >= t)
+        return l.setStart(a, t - r), l.collapse(!0), l;
+      r += o;
     } else
       for (let o = a.childNodes.length - 1; o >= 0; o--) n.push(a.childNodes[o]);
   return l.setStart(e, e.childNodes.length), l.collapse(!0), l;
 }, R = (e, t, l) => {
-  const n = A(t, l);
+  const n = V(t, l);
   e.removeAllRanges(), e.addRange(n);
-}, C = (e, t) => {
+}, T = (e, t) => {
   const l = e.getRangeAt(0), n = l.cloneRange();
   return n.selectNodeContents(t), n.setEnd(l.endContainer, l.endOffset), n.toString().length;
-}, V = (e) => {
-  const t = x(0);
-  return N(() => {
+}, A = (e) => {
+  const t = m(0);
+  return C(() => {
     const l = (n) => {
       n.key === "ArrowUp" ? (n.preventDefault(), console.log("up ", t.value), t.value = t.value > 0 ? t.value - 1 : 0) : n.key === "ArrowDown" ? (n.preventDefault(), console.log("down ", t.value), t.value = t.value < e.options.value.length - 1 ? t.value + 1 : t.value) : (n.key === "Tab" || n.key === "Enter") && (n.preventDefault(), e.onSelect(e.options.value[t.value]));
     };
     return document.addEventListener("keydown", l), () => document.removeEventListener("keydown", l);
-  }, []), /* @__PURE__ */ b("div", { class: "bubble-search__hintbox__list", children: e.options.value.map((l, n) => /* @__PURE__ */ b("div", { onMouseOver: () => t.value = n, class: `bubble-search__hintbox__list__item ${n === t.value ? "bubble-search__hintbox__list__item--active" : ""}`, onClick: (a) => {
+  }, []), /* @__PURE__ */ i("div", { class: "bubble-search__hintbox__list", children: e.options.value.map((l, n) => /* @__PURE__ */ i("div", { onMouseOver: () => t.value = n, class: `bubble-search__hintbox__list__item ${n === t.value ? "bubble-search__hintbox__list__item--active" : ""}`, onClick: (a) => {
     a.preventDefault(), a.stopPropagation(), a.stopImmediatePropagation(), e.onSelect(l);
-  }, children: /* @__PURE__ */ b(e.item, { ...l }) })) });
+  }, children: /* @__PURE__ */ i(e.item, { ...l }) })) });
 }, S = (e) => {
-  const t = E(null), l = x(), n = x(), a = x(""), c = E(null), o = p(
+  const t = E(null), l = m(), n = m(), a = m(""), r = E(null), o = x(
     () => n.value ? e.hints[n.value] : void 0
   );
-  return N(() => void t.current?.dispatchEvent(new Event("input")), []), /* @__PURE__ */ b("div", { class: "bubble-search", children: [
-    /* @__PURE__ */ b("div", { ref: t, class: "bubble-search__textbox", contenteditable: !0, spellcheck: !1, onInput: (u) => {
-      let s = {}, d = u.currentTarget.innerText.replace(/(^|\s)([^\s]+):([^\s]*)/g, (f, m, i, v) => Object.keys(e.hints).includes(i) ? (console.log("k: ", i), console.log("v: ", v), e.hints[i].deserialize(v) && (i in s ? s[i].push(v) : s[i] = [v]), `<span class="bubble-search__textbox__bubble-space">${m}</span><span class="bubble-search__textbox__bubble"><span class="bubble-search__textbox__bubble__key">${i}<span class="bubble-search__textbox__bubble-colon">:</span></span><span class="bubble-search__textbox__bubble__value">${v}</span></span>`) : f.replace(
+  return C(() => void t.current?.dispatchEvent(new Event("input")), []), /* @__PURE__ */ i("div", { class: "bubble-search", children: [
+    /* @__PURE__ */ i("div", { ref: t, class: "bubble-search__textbox", contenteditable: !0, spellcheck: !1, onInput: (u) => {
+      let _ = {}, p = u.currentTarget.innerText.replace(/(^|\s)([^\s]+):([^\s]*)/g, (f, g, s, v) => Object.keys(e.hints).includes(s) ? (console.log("k: ", s), console.log("v: ", v), e.hints[s].deserialize(v) && (s in _ ? _[s].push(v) : _[s] = [v]), `<span class="bubble-search__textbox__bubble-space">${g}</span><span class="bubble-search__textbox__bubble"><span class="bubble-search__textbox__bubble__key">${s}<span class="bubble-search__textbox__bubble-colon">:</span></span><span class="bubble-search__textbox__bubble__value">${v}</span></span>`) : f.replace(
         /^(\s*)([^\s]+)(\s*)$/,
-        (I, $, w, H) => `${" ".repeat($.length)}<span class="bubble-search__textbox__bubble--invalid" data-error="Unknown property '${i}'">${w}</span>${" ".repeat(H.length)}`
+        (P, w, H, L) => `${" ".repeat(w.length)}<span class="bubble-search__textbox__bubble--invalid" data-error="Unknown property '${s}'">${H}</span>${" ".repeat(L.length)}`
       )).replace(/\u00A0([^\s<>])/g, " $1").replace(/(<\/span>)\s*$/, "$1 ");
-      const h = document.getSelection(), T = h.rangeCount && C(h, u.currentTarget);
-      u.currentTarget.innerHTML = d, h.rangeCount && R(h, u.currentTarget, T);
-      const _ = h.anchorNode?.parentElement;
-      let g;
-      if (_ && (c.current = _, _.className === "bubble-search__textbox__bubble-colon" ? (n.value = _.parentElement.childNodes[0].textContent, a.value = "", g = _.parentElement.parentElement) : _.className === "bubble-search__textbox__bubble__value" ? (n.value = _.parentElement.childNodes[0].childNodes[0].textContent, a.value = _.textContent, g = _.parentElement) : (n.value = void 0, a.value = "")), g && t.current) {
-        const f = g.getBoundingClientRect(), m = t.current.getBoundingClientRect(), i = f.x - m.x, v = f.y - m.y;
-        l.value = { x: i, y: v };
+      const h = document.getSelection(), $ = h.rangeCount && T(h, u.currentTarget);
+      u.currentTarget.innerHTML = p, h.rangeCount && R(h, u.currentTarget, $);
+      const b = h.anchorNode?.parentElement;
+      let d;
+      if (b && (r.current = b, b.className === "bubble-search__textbox__bubble-colon" ? (n.value = b.parentElement.childNodes[0].textContent, a.value = "", d = b.parentElement.parentElement) : b.className === "bubble-search__textbox__bubble__value" ? (n.value = b.parentElement.childNodes[0].childNodes[0].textContent, a.value = b.textContent, d = b.parentElement) : (n.value = void 0, a.value = "")), d && t.current) {
+        const f = d.getBoundingClientRect(), g = t.current.getBoundingClientRect(), s = f.x - g.x, v = f.y - g.y;
+        l.value = { x: s, y: v };
       } else
         l.value = void 0;
-      s.rowText = d.replace(/<[^>]*>/g, ""), e.onInput(s);
+      _.rowText = p.replace(/<[^>]*>/g, ""), e.onInput(_);
     }, children: "Hello! My name:Artur" }),
-    /* @__PURE__ */ b(D, { textboxRef: t, anchor: c, position: l, hint: o, closeHint: () => n.value = void 0, partialValue: a })
+    /* @__PURE__ */ i(M, { textboxRef: t, anchor: r, position: l, hint: o, closeHint: () => n.value = void 0, partialValue: a })
   ] });
-}, D = (e) => {
+}, M = (e) => {
   if (!e.hint.value) return null;
-  const t = p(() => !e.hint.value || e.hint.value.type === "custom" ? [] : e.hint.value.getOptions(e.partialValue.value)), l = p(
+  const t = x(() => !e.hint.value || e.hint.value.type === "custom" ? [] : e.hint.value.getOptions(e.partialValue.value)), l = x(
     () => e.position.value && `transform: translate(${e.position.value.x}px, 10px)`
     // `transform: translate(${props.position.value.x}px, ${props.position.value.y}px)`
   );
-  return /* @__PURE__ */ b("div", { class: "bubble-search__hintbox", style: l, children: e.hint.value.type === "custom" ? /* @__PURE__ */ b(
+  return /* @__PURE__ */ i("div", { class: "bubble-search__hintbox", style: l, children: e.hint.value.type === "custom" ? /* @__PURE__ */ i(
     e.hint.value.component,
     {
       value: e.partialValue,
       onSelect: (n) => {
-        console.log(n);
+        e.hint.value && e.hint.value.type === "custom" && (console.log("ON SELECT"), N({
+          currentBubbleAnchor: e.anchor,
+          textInputAnchor: e.textboxRef,
+          rowValue: e.hint.value.format(n)
+        }), e.closeHint());
       }
     }
-  ) : /* @__PURE__ */ b(V, { item: e.hint.value.item, options: t, onSelect: (n) => {
-    if (e.hint.value && e.hint.value.type === "list") {
-      const a = e.hint.value.format(n);
-      if (e.anchor.current) {
-        let c;
-        if (e.anchor.current.classList.contains("bubble-search__textbox__bubble__value") ? c = e.anchor.current : e.anchor.current.classList.contains("bubble-search__textbox__bubble-colon") && (c = e.anchor.current.parentElement?.nextElementSibling), console.log("value span: ", c), !c) return;
-        const o = document.createAttribute("data-item");
-        o.value = JSON.stringify(n), c.attributes.setNamedItem(o);
-        const r = document.getSelection(), u = r.rangeCount && C(r, e.textboxRef.current), s = c.innerHTML.length;
-        c.innerHTML = a, r.rangeCount && R(r, e.textboxRef.current, u + a.length - s + 1), e.closeHint();
-        const d = new Event("input");
-        e.textboxRef.current?.dispatchEvent(d);
-      }
-    }
-    console.log("anchor: ", e.anchor), console.log("selected: ", n);
+  ) : /* @__PURE__ */ i(A, { item: e.hint.value.item, options: t, onSelect: (n) => {
+    e.hint.value && e.hint.value.type === "list" && N({
+      currentBubbleAnchor: e.anchor,
+      textInputAnchor: e.textboxRef,
+      rowValue: e.hint.value.format(n)
+    }), e.closeHint(), console.log("anchor: ", e.anchor), console.log("selected: ", n);
   } }) });
+}, N = ({ currentBubbleAnchor: e, textInputAnchor: t, rowValue: l }) => {
+  if (e.current) {
+    let n;
+    if (e.current.classList.contains("bubble-search__textbox__bubble__value") ? n = e.current : e.current.classList.contains("bubble-search__textbox__bubble-colon") && (n = e.current.parentElement?.nextElementSibling), !n) return;
+    const a = document.getSelection(), r = a.rangeCount && T(a, t.current), o = n.innerHTML.length;
+    n.innerHTML = l, a.rangeCount && R(a, t.current, r + l.length - o + 1);
+    const c = new Event("input");
+    t.current?.dispatchEvent(c);
+  }
 };
-S.mount = (e, t) => L(/* @__PURE__ */ b(S, { ...t }), document.querySelector(e));
+S.mount = (e, t) => k(/* @__PURE__ */ i(S, { ...t }), document.querySelector(e));
 export {
   S as BubblesSearch
 };
