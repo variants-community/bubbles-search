@@ -56,9 +56,9 @@ const List = <T extends Record<string, unknown>>(props: {
   const scrollToIndexHack = (index: number) => {
     if (!ref.current) return
 
-    const top = (ref.current.children[index]as any).offsetTop
-    ref.current.scrollTop = top
-    // ref.current?.children[index].scrollIntoView({behavior: 'smooth', block: 'nearest'})
+    // const top = (ref.current.children[index]as any).offsetTop
+    // ref.current.scrollTop = top
+    ref.current?.children[index].scrollIntoView({behavior: 'smooth', block: 'nearest'})
     return 'bubble-search__hintbox__list__item--active'
   }
 
