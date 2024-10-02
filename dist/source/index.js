@@ -27,9 +27,9 @@ const List = (props) => {
     const scrollToIndexHack = (index) => {
         if (!ref.current)
             return;
-        const top = ref.current.children[index].offsetTop;
-        ref.current.scrollTop = top;
-        // ref.current?.children[index].scrollIntoView({behavior: 'smooth', block: 'nearest'})
+        // const top = (ref.current.children[index]as any).offsetTop
+        // ref.current.scrollTop = top
+        ref.current?.children[index].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         return 'bubble-search__hintbox__list__item--active';
     };
     return (_jsx("div", { ref: ref, class: 'bubble-search__hintbox__list', children: props.options.value.map((option, i) => (_jsx("div", { onMouseOver: () => current.value = i, class: `bubble-search__hintbox__list__item ${i === current.value ? scrollToIndexHack(i) : ''}`, onClick: (e) => {
